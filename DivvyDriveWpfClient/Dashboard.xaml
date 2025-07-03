@@ -1,0 +1,159 @@
+﻿<Window x:Class="DivvyDriveWpfClient.Dashboard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:DivvyDriveWpfClient"
+        Title="DivvyDrive - Dashboard" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="#FF1E1E1E">
+
+    <Window.Resources>
+        <!-- TextBox Stili -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#333333"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#555555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8" Padding="4">
+                            <ScrollViewer x:Name="PART_ContentHost" Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Button Stili -->
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="#336699"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#4D7EBF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#555555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Kart Hover Stili -->
+        <Style x:Key="CardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#2E2E2E"/>
+            <Setter Property="BorderBrush" Value="#555555"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#444444"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ContextMenu Kaynağı -->
+        <ContextMenu x:Key="CardOptionsMenu">
+            <MenuItem Header="📁 Klasörü Sil" Click="DeleteFolder_Click"/>
+            <MenuItem Header="✏️ Yeniden Adlandır" Click="RenameFolder_Click"/>
+            <MenuItem Header="📂 Klasörü Taşı" Click="MoveFolder_Click"/>
+        </ContextMenu>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Üst Bar -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+            <TextBlock Text="Mevcut Klasör:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox x:Name="KlasorYoluTextBox" Width="400" IsReadOnly="True" Margin="0,0,10,0"/>
+            <Button x:Name="UstKlasoreDonButton" Width="180" Click="UstKlasoreDonButton_Click">
+                <TextBlock Text="⬆ Üst Klasöre Dön"/>
+            </Button>
+            <Button x:Name="AnaDizinListeleButton" Width="180" Click="AnaDizinListeleButton_Click" Margin="0">
+                <TextBlock Text="🏠 Ana Dizini Listele"/>
+            </Button>
+        </StackPanel>
+
+        <!-- Kartlı Klasör ve Dosya Listesi -->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl x:Name="KlasorItemsControl">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Width="140" Height="160" Margin="10"
+                                CornerRadius="8"
+                                Style="{StaticResource CardBorderStyle}"
+                                MouseLeftButtonDown="KlasorKart_Click">
+                            <Grid>
+                                <!-- Üç Nokta Butonu -->
+                                <Button Content="⋮"
+                                        Width="24" Height="24"
+                                        FontSize="14"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Background="Transparent"
+                                        BorderBrush="Transparent"
+                                        Foreground="White"
+                                        Click="CardOptionsButton_Click"
+                                        Tag="{Binding}"/>
+
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+                                    <Image Source="pack://application:,,,/Assets/klasor.png" Width="48" Height="48" Margin="0,0,0,5"/>
+                                    <TextBlock Text="{Binding}" Foreground="White" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Klasör Oluştur -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,15,0,0">
+            <TextBox x:Name="YeniKlasorAdiTextBox" Width="400" ToolTip="Oluşturulacak klasör adı" Margin="0,0,10,0"/>
+            <Button Width="180" Background="#43A047" Click="OlusturButton_Click" Margin="0">
+                <TextBlock Text="📁 Klasör Oluştur"/>
+            </Button>
+        </StackPanel>
+
+        <!-- Dosya Yükle/İndir -->
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0,15,0,0">
+            <Button Width="180" Click="DosyaYukleButton_Click">
+                <TextBlock Text="⬆ Dosya Yükle"/>
+            </Button>
+            <Button Width="180" Background="#FB8C00" Click="DosyaIndirButton_Click" Margin="10,0,0,0">
+                <TextBlock Text="⬇ Dosya İndir"/>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
