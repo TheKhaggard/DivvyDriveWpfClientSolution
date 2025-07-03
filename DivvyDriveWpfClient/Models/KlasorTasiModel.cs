@@ -7,4 +7,5 @@
         public string eskiKlasorYolu { get; set; }
         public string yeniKlasorYolu { get; set; }
     }
+    //sa
 }

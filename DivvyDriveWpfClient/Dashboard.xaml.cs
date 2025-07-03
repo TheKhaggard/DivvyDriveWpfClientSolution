@@ -1,14 +1,19 @@
 ﻿using DivvyDriveWpfClient.Models;
 using DivvyDriveWpfClient.Services;
-using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 using Microsoft.VisualBasic;
 using Microsoft.Win32;
+using Newtonsoft.Json;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace DivvyDriveWpfClient
 {
@@ -16,7 +21,7 @@ namespace DivvyDriveWpfClient
     {
         private readonly ApiService _apiService;
         private readonly Ticket _ticket;
-        private string _seciliKlasorAdi;
+        private string? _seciliKlasorAdi;
 
         public Dashboard(Ticket ticket)
         {
@@ -30,9 +35,14 @@ namespace DivvyDriveWpfClient
 
         private async void ListeleKlasorleri()
         {
+            await LoadFolderContentsAsync(_ticket.ID, KlasorYoluTextBox.Text.Trim());
+        }
+
+        private async Task LoadFolderContentsAsync(Guid ticketId, string folderPath)
+        {
             try
             {
-                var sonuc = await _apiService.KlasorListesiGetirAsync(_ticket.ID, KlasorYoluTextBox.Text.Trim());
+                var sonuc = await _apiService.KlasorListesiGetirAsync(ticketId, folderPath);
                 KlasorItemsControl.Items.Clear();
 
                 if (sonuc?.SonucKlasorListe != null)
@@ -127,7 +137,6 @@ namespace DivvyDriveWpfClient
             }
         }
 
-
         private async void MoveFolder_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_seciliKlasorAdi))
@@ -169,7 +178,6 @@ namespace DivvyDriveWpfClient
                 MessageBox.Show($"Klasör taşınırken hata oluştu: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         private async void RenameFolder_Click(object sender, RoutedEventArgs e)
         {
@@ -252,16 +260,35 @@ namespace DivvyDriveWpfClient
             try
             {
                 var openFileDialog = new OpenFileDialog();
-                if (openFileDialog.ShowDialog() != true) return;
+                if (openFileDialog.ShowDialog() != true)
+                    return;
 
                 string filePath = openFileDialog.FileName;
+
+                if (!File.Exists(filePath))
+                {
+                    MessageBox.Show("Seçilen dosya bulunamadı.", "Hata");
+                    return;
+                }
+
                 string fileName = Path.GetFileName(filePath);
+
+                // ✅ Dosyayı ham byte olarak oku
                 byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                Debug.WriteLine($"[LOG] Dosya byte uzunluğu: {fileBytes.Length}");
 
-                using var md5 = MD5.Create();
-                byte[] hashBytes = md5.ComputeHash(fileBytes);
-                string hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+                // ✅ MD5 hash hesapla
+                string hashString;
+                using (var md5 = MD5.Create())
+                {
+                    var hash = md5.ComputeHash(fileBytes);
+                    hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
 
+                Debug.WriteLine($"[LOG] Hesaplanan MD5: {hashString}");
+                MessageBox.Show($"Hesaplanan Hash: {hashString}");
+
+                // ✅ Modeli oluştur
                 var model = new DosyaDirektYukleModel
                 {
                     ticketID = _ticket.ID,
@@ -270,20 +297,24 @@ namespace DivvyDriveWpfClient
                     dosyaHash = hashString
                 };
 
-                var result = await _apiService.DosyaDirektYukleAsync(model);
+                // ✅ API fonksiyonuna gönder
+                var result = await _apiService.DosyaDirektYukleAsync(model, fileBytes);
+
                 if (result?.Sonuc == true)
                 {
-                    MessageBox.Show($"Dosya '{fileName}' yüklendi.", "Başarılı");
+                    MessageBox.Show($"Dosya '{fileName}' başarıyla yüklendi.", "Başarılı");
                     ListeleKlasorleri();
                 }
                 else
                 {
-                    MessageBox.Show($"Dosya yüklenemedi: {result?.Mesaj ?? "Bilinmeyen hata"}", "Hata");
+                    MessageBox.Show($"Yükleme başarısız: {result?.Mesaj ?? "Bilinmeyen hata"}", "Hata");
+                    Debug.WriteLine($"[LOG] Sunucu hatası: {result?.Mesaj}");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Dosya yüklerken hata: {ex.Message}", "Hata");
+                MessageBox.Show($"Hata oluştu: {ex.Message}", "Hata");
+                Debug.WriteLine($"[LOG] Exception: {ex}");
             }
         }
 
@@ -320,5 +351,15 @@ namespace DivvyDriveWpfClient
                 MessageBox.Show($"Dosya indirirken hata: {ex.Message}", "Hata");
             }
         }
+
+        // Yeni eklenen refresh butonu click eventi
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_ticket != null)
+            {
+                _ = LoadFolderContentsAsync(_ticket.ID, KlasorYoluTextBox.Text.Trim());
+            }
+        }
+
     }
 }
