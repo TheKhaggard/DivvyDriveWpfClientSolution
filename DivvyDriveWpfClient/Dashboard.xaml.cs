@@ -35,9 +35,14 @@ namespace DivvyDriveWpfClient
 
         private async void ListeleKlasorleri()
         {
+            await LoadFolderContentsAsync(_ticket.ID, KlasorYoluTextBox.Text.Trim());
+        }
+
+        private async Task LoadFolderContentsAsync(Guid ticketId, string folderPath)
+        {
             try
             {
-                var sonuc = await _apiService.KlasorListesiGetirAsync(_ticket.ID, KlasorYoluTextBox.Text.Trim());
+                var sonuc = await _apiService.KlasorListesiGetirAsync(ticketId, folderPath);
                 KlasorItemsControl.Items.Clear();
 
                 if (sonuc?.SonucKlasorListe != null)
@@ -346,5 +351,15 @@ namespace DivvyDriveWpfClient
                 MessageBox.Show($"Dosya indirirken hata: {ex.Message}", "Hata");
             }
         }
+
+        // Yeni eklenen refresh butonu click eventi
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_ticket != null)
+            {
+                _ = LoadFolderContentsAsync(_ticket.ID, KlasorYoluTextBox.Text.Trim());
+            }
+        }
+
     }
 }
