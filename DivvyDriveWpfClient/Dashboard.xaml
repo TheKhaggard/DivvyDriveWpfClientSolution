@@ -86,6 +86,38 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Üç Nokta Buton Stili -->
+        <Style x:Key="ThreeDotsButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="6"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#777777"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#444444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Kart Hover Stili -->
         <Style x:Key="CardBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="#2E2E2E"/>
@@ -94,6 +126,7 @@
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Width" Value="110"/>
             <Setter Property="Height" Value="130"/>
+            <Setter Property="CornerRadius" Value="6"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#444444"/>
@@ -159,13 +192,9 @@
                             <Grid>
                                 <!-- Üç Nokta Butonu -->
                                 <Button Content="⋮"
-                                        Width="18" Height="18"
-                                        FontSize="12"
+                                        Style="{StaticResource ThreeDotsButtonStyle}"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Top"
-                                        Background="Transparent"
-                                        BorderBrush="Transparent"
-                                        Foreground="White"
                                         Click="CardOptionsButton_Click"
                                         Tag="{Binding}"/>
 
@@ -181,18 +210,31 @@
         </ScrollViewer>
 
         <!-- Klasör Oluştur ve Dosya İşlemleri -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,15,0,0">
-            <TextBox x:Name="YeniKlasorAdiTextBox" Width="400" ToolTip="Oluşturulacak klasör adı" Margin="0,0,10,0" FontSize="11" Padding="2"/>
-            <Button Width="150" Style="{StaticResource BlueButtonStyle}" Click="OlusturButton_Click" Margin="0">
-                <TextBlock Text="📁 Klasör Oluştur"/>
-            </Button>
-            <Button Width="150" Style="{StaticResource GreenButtonStyle}" Click="DosyaYukleButton_Click" Margin="10,0,0,0">
-                <TextBlock Text="⬆ Dosya Yükle"/>
-            </Button>
-            <Button Width="150" Style="{StaticResource OrangeButtonStyle}" Click="DosyaIndirButton_Click" Margin="10,0,0,0">
-                <TextBlock Text="⬇ Dosya İndir"/>
-            </Button>
-        </StackPanel>
+        <Grid Grid.Row="2" Margin="0,15,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sol taraf: Klasör adı ve Klasör Oluştur butonu -->
+            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                <TextBox x:Name="YeniKlasorAdiTextBox" Width="400" ToolTip="Oluşturulacak klasör adı" Margin="0,0,10,0" FontSize="11" Padding="2"/>
+                <Button Width="150" Style="{StaticResource BlueButtonStyle}" Click="OlusturButton_Click">
+                    <TextBlock Text="📁 Klasör Oluştur"/>
+                </Button>
+            </StackPanel>
+
+            <!-- Sağ alt köşeye yaslanmış Dosya Yükle ve İndir butonları -->
+            <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
+                <Button Width="150" Style="{StaticResource GreenButtonStyle}" Click="DosyaYukleButton_Click" Margin="0,0,10,0">
+                    <TextBlock Text="⬆ Dosya Yükle"/>
+                </Button>
+                <Button Width="150" Style="{StaticResource OrangeButtonStyle}" Click="DosyaIndirButton_Click">
+                    <TextBlock Text="⬇ Dosya İndir"/>
+                </Button>
+            </StackPanel>
+        </Grid>
 
         <!-- Alt Çerçeve ve Logo -->
         <Border Grid.Row="3" BorderBrush="#555555" BorderThickness="1" Padding="10" Margin="0,15,0,0" Background="#2E2E2E">
