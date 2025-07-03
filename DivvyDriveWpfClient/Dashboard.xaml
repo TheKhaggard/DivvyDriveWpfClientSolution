@@ -14,14 +14,15 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#555555"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Padding" Value="1"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
                         <Border Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8" Padding="4">
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ScrollViewer x:Name="PART_ContentHost" Foreground="{TemplateBinding Foreground}"/>
                         </Border>
                     </ControlTemplate>
@@ -29,21 +30,21 @@
             </Setter>
         </Style>
 
-        <!-- Button Stili -->
-        <Style TargetType="Button">
+        <!-- Button Temel Stili (Mavi Butonlar için) -->
+        <Style TargetType="Button" x:Key="BlueButtonStyle">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-            <Setter Property="Padding" Value="10,0"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Margin" Value="0,0,6,0"/>
+            <Setter Property="Padding" Value="6,0"/>
+            <Setter Property="FontSize" Value="11"/>
             <Setter Property="Background" Value="#336699"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -59,12 +60,40 @@
             </Setter>
         </Style>
 
+        <!-- Yeşil Buton Stili -->
+        <Style x:Key="GreenButtonStyle" TargetType="Button" BasedOn="{StaticResource BlueButtonStyle}">
+            <Setter Property="Background" Value="#43A047"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#66BB6A"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#2E7D32"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Turuncu Buton Stili -->
+        <Style x:Key="OrangeButtonStyle" TargetType="Button" BasedOn="{StaticResource BlueButtonStyle}">
+            <Setter Property="Background" Value="#FB8C00"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FFA726"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#EF6C00"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <!-- Kart Hover Stili -->
         <Style x:Key="CardBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="#2E2E2E"/>
             <Setter Property="BorderBrush" Value="#555555"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="110"/>
+            <Setter Property="Height" Value="130"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#444444"/>
@@ -85,20 +114,36 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
 
         <!-- Üst Bar -->
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-            <TextBlock Text="Mevcut Klasör:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <TextBox x:Name="KlasorYoluTextBox" Width="400" IsReadOnly="True" Margin="0,0,10,0"/>
-            <Button x:Name="UstKlasoreDonButton" Width="180" Click="UstKlasoreDonButton_Click">
-                <TextBlock Text="⬆ Üst Klasöre Dön"/>
-            </Button>
-            <Button x:Name="AnaDizinListeleButton" Width="180" Click="AnaDizinListeleButton_Click" Margin="0">
-                <TextBlock Text="🏠 Ana Dizini Listele"/>
-            </Button>
-        </StackPanel>
+        <Border Grid.Row="0" BorderBrush="#555555" BorderThickness="0,0,0,1" Padding="0,0,0,8">
+            <Grid Margin="0,0,0,15" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0">
+                    <TextBlock Text="Mevcut Klasör:" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
+                    <TextBox x:Name="KlasorYoluTextBox" Width="400" IsReadOnly="True" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                    <Button x:Name="UstKlasoreDonButton" Width="150" Click="UstKlasoreDonButton_Click" VerticalAlignment="Center" Style="{StaticResource BlueButtonStyle}">
+                        <TextBlock Text="⬆ Üst Klasöre Dön"/>
+                    </Button>
+                    <Button x:Name="AnaDizinListeleButton" Width="150" Click="AnaDizinListeleButton_Click" Margin="10,0,0,0" VerticalAlignment="Center" Style="{StaticResource BlueButtonStyle}">
+                        <TextBlock Text="🏠 Ana Dizini Listele"/>
+                    </Button>
+                </StackPanel>
+
+                <Grid Grid.Column="2">
+                    <Button Width="40" Height="30" VerticalAlignment="Center" HorizontalAlignment="Right" Click="RefreshButton_Click" ToolTip="Yenile" Style="{StaticResource BlueButtonStyle}">
+                        <Image Source="pack://application:,,,/Assets/refresh_icon.png" Stretch="Uniform"/>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
 
         <!-- Kartlı Klasör ve Dosya Listesi -->
         <ScrollViewer Grid.Row="1">
@@ -110,15 +155,12 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="140" Height="160" Margin="10"
-                                CornerRadius="8"
-                                Style="{StaticResource CardBorderStyle}"
-                                MouseLeftButtonDown="KlasorKart_Click">
+                        <Border Style="{StaticResource CardBorderStyle}" MouseLeftButtonDown="KlasorKart_Click" Margin="6">
                             <Grid>
                                 <!-- Üç Nokta Butonu -->
                                 <Button Content="⋮"
-                                        Width="24" Height="24"
-                                        FontSize="14"
+                                        Width="18" Height="18"
+                                        FontSize="12"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Top"
                                         Background="Transparent"
@@ -128,8 +170,8 @@
                                         Tag="{Binding}"/>
 
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
-                                    <Image Source="pack://application:,,,/Assets/klasor.png" Width="48" Height="48" Margin="0,0,0,5"/>
-                                    <TextBlock Text="{Binding}" Foreground="White" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                                    <Image Source="pack://application:,,,/Assets/klasor.png" Width="38" Height="38" Margin="0,0,0,5"/>
+                                    <TextBlock Text="{Binding}" Foreground="White" FontSize="10" TextAlignment="Center" TextWrapping="Wrap" Width="100"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -138,22 +180,30 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <!-- Klasör Oluştur -->
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,15,0,0">
-            <TextBox x:Name="YeniKlasorAdiTextBox" Width="400" ToolTip="Oluşturulacak klasör adı" Margin="0,0,10,0"/>
-            <Button Width="180" Background="#43A047" Click="OlusturButton_Click" Margin="0">
+        <!-- Klasör Oluştur ve Dosya İşlemleri -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,15,0,0">
+            <TextBox x:Name="YeniKlasorAdiTextBox" Width="400" ToolTip="Oluşturulacak klasör adı" Margin="0,0,10,0" FontSize="11" Padding="2"/>
+            <Button Width="150" Style="{StaticResource BlueButtonStyle}" Click="OlusturButton_Click" Margin="0">
                 <TextBlock Text="📁 Klasör Oluştur"/>
             </Button>
-        </StackPanel>
-
-        <!-- Dosya Yükle/İndir -->
-        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0,15,0,0">
-            <Button Width="180" Click="DosyaYukleButton_Click">
+            <Button Width="150" Style="{StaticResource GreenButtonStyle}" Click="DosyaYukleButton_Click" Margin="10,0,0,0">
                 <TextBlock Text="⬆ Dosya Yükle"/>
             </Button>
-            <Button Width="180" Background="#FB8C00" Click="DosyaIndirButton_Click" Margin="10,0,0,0">
+            <Button Width="150" Style="{StaticResource OrangeButtonStyle}" Click="DosyaIndirButton_Click" Margin="10,0,0,0">
                 <TextBlock Text="⬇ Dosya İndir"/>
             </Button>
         </StackPanel>
+
+        <!-- Alt Çerçeve ve Logo -->
+        <Border Grid.Row="3" BorderBrush="#555555" BorderThickness="1" Padding="10" Margin="0,15,0,0" Background="#2E2E2E">
+            <Grid>
+                <TextBlock Text="© 2025 DivvyDrive" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0"/>
+                <Image Source="pack://application:,,,/Assets/divvydrivelogo.png" Width="140" Height="40" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0">
+                    <Image.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="8" ShadowDepth="2" Opacity="0.7"/>
+                    </Image.Effect>
+                </Image>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
