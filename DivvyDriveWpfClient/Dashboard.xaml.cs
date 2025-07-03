@@ -267,20 +267,32 @@ namespace DivvyDriveWpfClient
                 }
 
                 string fileName = Path.GetFileName(filePath);
+
+                // ✅ Dosyayı ham byte olarak oku
                 byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                Debug.WriteLine($"[LOG] Dosya byte uzunluğu: {fileBytes.Length}");
 
-                using var md5 = MD5.Create();
-                byte[] hashBytes = md5.ComputeHash(fileBytes);
-                string hashString = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+                // ✅ MD5 hash hesapla
+                string hashString;
+                using (var md5 = MD5.Create())
+                {
+                    var hash = md5.ComputeHash(fileBytes);
+                    hashString = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
 
+                Debug.WriteLine($"[LOG] Hesaplanan MD5: {hashString}");
+                MessageBox.Show($"Hesaplanan Hash: {hashString}");
+
+                // ✅ Modeli oluştur
                 var model = new DosyaDirektYukleModel
                 {
-                    ticketID = _ticket.ID, // Guid
+                    ticketID = _ticket.ID,
                     dosyaAdi = fileName,
                     klasorYolu = KlasorYoluTextBox.Text.Trim(),
                     dosyaHash = hashString
                 };
 
+                // ✅ API fonksiyonuna gönder
                 var result = await _apiService.DosyaDirektYukleAsync(model, fileBytes);
 
                 if (result?.Sonuc == true)
@@ -290,12 +302,14 @@ namespace DivvyDriveWpfClient
                 }
                 else
                 {
-                    MessageBox.Show($"Dosya yüklenemedi: {result?.Mesaj ?? "Bilinmeyen hata"}", "Hata");
+                    MessageBox.Show($"Yükleme başarısız: {result?.Mesaj ?? "Bilinmeyen hata"}", "Hata");
+                    Debug.WriteLine($"[LOG] Sunucu hatası: {result?.Mesaj}");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Yükleme sırasında hata oluştu: {ex.Message}", "Hata");
+                MessageBox.Show($"Hata oluştu: {ex.Message}", "Hata");
+                Debug.WriteLine($"[LOG] Exception: {ex}");
             }
         }
 
